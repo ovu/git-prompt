@@ -5,4 +5,9 @@ import GitLib
 main :: IO ()
 main = do
   branchName <- getBranchName
-  putStrLn branchName
+  if branchName /= ""
+  then
+    putStrLn branchName
+  else do
+    shortRevision <- getShortRevisionOfHead
+    putStrLn shortRevision
