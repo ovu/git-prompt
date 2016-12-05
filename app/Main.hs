@@ -3,4 +3,6 @@ module Main where
 import GitLib
 
 main :: IO ()
-main = someFunc
+main = do
+  branchName <- getBranchName
+  putStrLn branchName

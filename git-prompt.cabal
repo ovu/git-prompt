@@ -2,11 +2,11 @@ name:                git-prompt
 version:             0.1.0.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
-homepage:            https://github.com/githubuser/git-prompt#readme
+homepage:            https://github.com/ovu/git-prompt#readme
 license:             BSD3
 license-file:        LICENSE
-author:              Author name here
-maintainer:          example@example.com
+author:              Omar Diego Vera Ustariz
+maintainer:          omar.vera@gmail.com
 copyright:           2016 Author name here
 category:            Web
 build-type:          Simple
@@ -17,6 +17,7 @@ library
   hs-source-dirs:      src
   exposed-modules:     GitLib
   build-depends:       base >= 4.7 && < 5
+                      , process
   default-language:    Haskell2010
 
 executable git-prompt-exe
