@@ -1,6 +1,6 @@
 module Main where
 
-import Lib
+import GitLib
 
 main :: IO ()
 main = someFunc
