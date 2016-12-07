@@ -2,7 +2,7 @@ module GitLib
     ( getBranchName
       , getShortRevisionOfHead
       , getRemoteName
-      , getMergeName
+      , getMergeBranch
     ) where
 
 import System.Process
@@ -39,22 +39,20 @@ getRemoteName branchName = do
     then do
       return $ removeEndOfLine remoteName
     else
-      return "origin"
+      return ""
 
 type MergeName = String
 
-getMergeName :: RemoteName -> BranchName -> IO MergeName
-getMergeName remoteName branchName = do
-      if remoteName == "origin"
-      then 
-        return $ printf "refs/heads/%s" branchName
-      else do
+getMergeBranch :: BranchName -> IO MergeName
+getMergeBranch branchName = do
         ( exitCode, mergeName, _ ) <- readProcessWithExitCode "git" ["config", printf "branch.%s.merge" branchName] []
         if exitCode == ExitSuccess
         then do
-          return $ removeEndOfLine mergeName
+          return $ (removeFirstElevenChars . removeEndOfLine) mergeName
         else
           return ""
+  where
+    removeFirstElevenChars = drop 11
 
 -- Helper functions
 removeEndOfLine :: String -> String

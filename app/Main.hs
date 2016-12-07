@@ -10,8 +10,8 @@ main = do
     putStrLn branchName
     remoteName <- getRemoteName branchName
     putStrLn remoteName
-    mergeName <- getMergeName remoteName branchName
-    putStrLn mergeName
+    mergeBranch <- getMergeBranch branchName
+    putStrLn mergeBranch
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision
