@@ -4,7 +4,7 @@ module GitLib
       , getRemoteName
       , getMergeBranch
       , getDifferenceWithRemote
-      , DiffWithRemote
+      , DiffWithRemote (..)
     ) where
 
 import System.Process
