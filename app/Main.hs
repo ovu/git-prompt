@@ -18,6 +18,7 @@ main = do
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision
+    putStrLn "." -- No remote information when in hash
 
 getDiffWithRemoteText :: DiffWithRemote -> String
 getDiffWithRemoteText diffWithRemote =
