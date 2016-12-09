@@ -66,10 +66,8 @@ getDifferenceWithRemote remoteName mergeName = do
         ( exitCode, behindAndAheadText, _ ) <- readProcessWithExitCode "git" ["rev-list", "--left-right", "--count", printf "%s...HEAD" remoteRef] []
         if exitCode == ExitSuccess
         then do
-          traceM $ "result:" ++ show behindAndAheadText
           let behindAndAheadArray = words behindAndAheadText
           let behindInt = ( read . head ) behindAndAheadArray
-          traceM $ "behindInt:" ++ show behindInt
           let aheadInt = ( read . last ) behindAndAheadArray
           return $ DiffWithRemote behindInt aheadInt
         else
