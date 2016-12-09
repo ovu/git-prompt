@@ -12,6 +12,8 @@ main = do
     putStrLn remoteName
     mergeBranch <- getMergeBranch branchName
     putStrLn mergeBranch
+    differenceWithRemote <- getDifferenceWithRemote remoteName mergeBranch
+    putStrLn $ show differenceWithRemote
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision

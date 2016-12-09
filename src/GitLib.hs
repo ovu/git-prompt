@@ -3,11 +3,14 @@ module GitLib
       , getShortRevisionOfHead
       , getRemoteName
       , getMergeBranch
+      , getDifferenceWithRemote
+      , DiffWithRemote
     ) where
 
 import System.Process
 import System.Exit
 import Text.Printf
+import Debug.Trace
 
 type BranchName = String
 
@@ -54,6 +57,24 @@ getMergeBranch branchName = do
   where
     removeFirstElevenChars = drop 11
 
+data DiffWithRemote = DiffWithRemote { behind :: Integer, 
+                                       ahead :: Integer} deriving Show
+
+getDifferenceWithRemote :: RemoteName -> MergeName -> IO DiffWithRemote
+getDifferenceWithRemote remoteName mergeName = do
+        let remoteRef = ( printf "refs/remotes/%s/%s" remoteName mergeName ) :: String
+        ( exitCode, behindAndAheadText, _ ) <- readProcessWithExitCode "git" ["rev-list", "--left-right", "--count", printf "%s...HEAD" remoteRef] []
+        if exitCode == ExitSuccess
+        then do
+          traceM $ "result:" ++ show behindAndAheadText
+          let behindAndAheadArray = words behindAndAheadText
+          let behindInt = ( read . head ) behindAndAheadArray
+          traceM $ "behindInt:" ++ show behindInt
+          let aheadInt = ( read . last ) behindAndAheadArray
+          return $ DiffWithRemote behindInt aheadInt
+        else
+          return $ DiffWithRemote 0 0
+          
 -- Helper functions
 removeEndOfLine :: String -> String
 removeEndOfLine = filter (/= '\n')
