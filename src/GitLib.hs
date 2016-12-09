@@ -10,7 +10,6 @@ module GitLib
 import System.Process
 import System.Exit
 import Text.Printf
-import Debug.Trace
 
 type BranchName = String
 
@@ -44,9 +43,9 @@ getRemoteName branchName = do
     else
       return ""
 
-type MergeName = String
+type MergeBranch = String
 
-getMergeBranch :: BranchName -> IO MergeName
+getMergeBranch :: BranchName -> IO MergeBranch
 getMergeBranch branchName = do
         ( exitCode, mergeName, _ ) <- readProcessWithExitCode "git" ["config", printf "branch.%s.merge" branchName] []
         if exitCode == ExitSuccess
@@ -57,10 +56,10 @@ getMergeBranch branchName = do
   where
     removeFirstElevenChars = drop 11
 
-data DiffWithRemote = DiffWithRemote { behind :: Integer, 
+data DiffWithRemote = DiffWithRemote { behind :: Integer,
                                        ahead :: Integer} deriving Show
 
-getDifferenceWithRemote :: RemoteName -> MergeName -> IO DiffWithRemote
+getDifferenceWithRemote :: RemoteName -> MergeBranch -> IO DiffWithRemote
 getDifferenceWithRemote remoteName mergeName = do
         let remoteRef = ( printf "refs/remotes/%s/%s" remoteName mergeName ) :: String
         ( exitCode, behindAndAheadText, _ ) <- readProcessWithExitCode "git" ["rev-list", "--left-right", "--count", printf "%s...HEAD" remoteRef] []
@@ -72,7 +71,7 @@ getDifferenceWithRemote remoteName mergeName = do
           return $ DiffWithRemote behindInt aheadInt
         else
           return $ DiffWithRemote 0 0
-          
+
 -- Helper functions
 removeEndOfLine :: String -> String
 removeEndOfLine = filter (/= '\n')
