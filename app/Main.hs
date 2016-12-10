@@ -15,10 +15,16 @@ main = do
     differenceWithRemote <- getDifferenceWithRemote remoteName mergeBranch
     -- putStrLn $ show differenceWithRemote
     putStrLn $ getDiffWithRemoteText differenceWithRemote
+    stagedStatus <- getStagedStatus
+    putStrLn $ show $ staged stagedStatus
+    putStrLn $ show $ conflicted stagedStatus
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision
     putStrLn "." -- No remote information when in hash
+    stagedStatus <- getStagedStatus
+    putStrLn $ show $ staged stagedStatus
+    putStrLn $ show $ conflicted stagedStatus
 
 getDiffWithRemoteText :: DiffWithRemote -> String
 getDiffWithRemoteText diffWithRemote =

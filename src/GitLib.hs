@@ -5,11 +5,14 @@ module GitLib
       , getMergeBranch
       , getDifferenceWithRemote
       , DiffWithRemote (..)
+      , getStagedStatus
+      , StagedStatus (..)
     ) where
 
 import System.Process
 import System.Exit
 import Text.Printf
+import Data.List
 
 type BranchName = String
 
@@ -56,8 +59,8 @@ getMergeBranch branchName = do
   where
     removeFirstElevenChars = drop 11
 
-data DiffWithRemote = DiffWithRemote { behind :: Integer,
-                                       ahead :: Integer} deriving Show
+data DiffWithRemote = DiffWithRemote { behindCommits :: Int,
+                                       aheadCommits :: Int } deriving Show
 
 getDifferenceWithRemote :: RemoteName -> MergeBranch -> IO DiffWithRemote
 getDifferenceWithRemote remoteName mergeName = do
@@ -71,6 +74,22 @@ getDifferenceWithRemote remoteName mergeName = do
           return $ DiffWithRemote behindInt aheadInt
         else
           return $ DiffWithRemote 0 0
+
+data StagedStatus = StagedStatus { staged :: Int,
+                                   conflicted :: Int } deriving Show
+
+getStagedStatus :: IO StagedStatus
+getStagedStatus = do 
+        ( exitCode, stagedLines, _ ) <- readProcessWithExitCode "git" ["diff", "--staged", "--name-status"] []
+        if exitCode == ExitSuccess
+        then do
+          let stagedLinesList = lines stagedLines
+          let conflictedFiles = length $ filter (\ line -> isPrefixOf "U"  line) stagedLinesList
+          let stagedFiles = length stagedLinesList - conflictedFiles
+          return $ StagedStatus stagedFiles conflictedFiles
+        else
+          return $ StagedStatus 0 0 
+
 
 -- Helper functions
 removeEndOfLine :: String -> String
