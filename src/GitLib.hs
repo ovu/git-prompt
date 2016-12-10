@@ -80,15 +80,17 @@ data StagedStatus = StagedStatus { staged :: Int,
 
 getStagedStatus :: IO StagedStatus
 getStagedStatus = do 
-        ( exitCode, stagedLines, _ ) <- readProcessWithExitCode "git" ["diff", "--staged", "--name-status"] []
+        ( exitCode, commandResult, _ ) <- readProcessWithExitCode "git" ["diff", "--staged", "--name-status"] []
         if exitCode == ExitSuccess
         then do
-          let stagedLinesList = lines stagedLines
-          let conflictedFiles = length $ filter (\ line -> isPrefixOf "U"  line) stagedLinesList
-          let stagedFiles = length stagedLinesList - conflictedFiles
+          let stagedLines = lines commandResult
+          let conflictedFiles = length $ getConflictedLines stagedLines
+          let stagedFiles = length stagedLines - conflictedFiles
           return $ StagedStatus stagedFiles conflictedFiles
         else
-          return $ StagedStatus 0 0 
+          return $ StagedStatus 0 0
+    where
+      getConflictedLines = filter (\ line -> isPrefixOf "U" line)
 
 
 -- Helper functions
