@@ -7,6 +7,7 @@ module GitLib
       , DiffWithRemote (..)
       , getStagedStatus
       , StagedStatus (..)
+      , getNumberOfChangedFiles
     ) where
 
 import System.Process
@@ -92,6 +93,19 @@ getStagedStatus = do
     where
       getConflictedLines = filter (\ line -> isPrefixOf "U" line)
 
+getNumberOfChangedFiles :: IO Int
+getNumberOfChangedFiles = do
+        ( exitCode, commandResult, _ ) <- readProcessWithExitCode "git" ["diff", "--name-status"] []
+        if exitCode == ExitSuccess
+        then do
+          let changedLines = lines commandResult
+          let unmergedFiles = length $ getUnmergedLines changedLines
+          let changedFiles = length changedLines - unmergedFiles
+          return changedFiles
+        else
+          return 0
+    where
+      getUnmergedLines = filter (\ line -> isPrefixOf "U" line)
 
 -- Helper functions
 removeEndOfLine :: String -> String

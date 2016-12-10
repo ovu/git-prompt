@@ -9,15 +9,14 @@ main = do
   then do
     putStrLn branchName
     remoteName <- getRemoteName branchName
-    -- putStrLn remoteName
     mergeBranch <- getMergeBranch branchName
-    -- putStrLn mergeBranch
     differenceWithRemote <- getDifferenceWithRemote remoteName mergeBranch
-    -- putStrLn $ show differenceWithRemote
     putStrLn $ getDiffWithRemoteText differenceWithRemote
     stagedStatus <- getStagedStatus
     putStrLn $ show $ staged stagedStatus
     putStrLn $ show $ conflicted stagedStatus
+    numberOfChangedFiles <- getNumberOfChangedFiles
+    putStrLn $ show numberOfChangedFiles
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision
@@ -25,11 +24,13 @@ main = do
     stagedStatus <- getStagedStatus
     putStrLn $ show $ staged stagedStatus
     putStrLn $ show $ conflicted stagedStatus
+    numberOfChangedFiles <- getNumberOfChangedFiles
+    putStrLn $ show numberOfChangedFiles
 
 getDiffWithRemoteText :: DiffWithRemote -> String
 getDiffWithRemoteText diffWithRemote =
-   case diffWithRemote of 
-    ( DiffWithRemote 0 0 ) -> "." 
+   case diffWithRemote of
+    ( DiffWithRemote 0 0 ) -> "."
     ( DiffWithRemote behind 0 ) -> "↓·" ++ show behind
     ( DiffWithRemote 0 ahead ) -> "↑·" ++ show ahead
     ( DiffWithRemote behind ahead ) -> "↓·" ++ show behind ++ "↑·" ++ show ahead
