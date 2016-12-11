@@ -13,23 +13,39 @@ main = do
     differenceWithRemote <- getDifferenceWithRemote remoteName mergeBranch
     putStrLn $ getDiffWithRemoteText differenceWithRemote
     stagedStatus <- getStagedStatus
-    putStrLn $ show $ staged stagedStatus
-    putStrLn $ show $ conflicted stagedStatus
+    let stagedFiles = staged stagedStatus
+    let conflictedFiles = conflicted stagedStatus
+    putStrLn $ show $ stagedFiles
+    putStrLn $ show $ conflictedFiles
     numberOfChangedFiles <- getNumberOfChangedFiles
     putStrLn $ show numberOfChangedFiles
     numberOfUntrackedFiles <- getNumberOfUntrackedFiles
     putStrLn $ show numberOfUntrackedFiles
+    let isCleanRepository = isLocalRepoClean stagedFiles conflictedFiles numberOfChangedFiles numberOfUntrackedFiles
+    if isCleanRepository == True
+    then putStrLn "1"
+    else putStrLn "0"
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision
     putStrLn "." -- No remote information when in hash
     stagedStatus <- getStagedStatus
-    putStrLn $ show $ staged stagedStatus
-    putStrLn $ show $ conflicted stagedStatus
+    let stagedFiles = staged stagedStatus
+    let conflictedFiles = conflicted stagedStatus
+    putStrLn $ show $ stagedFiles
+    putStrLn $ show $ conflictedFiles
     numberOfChangedFiles <- getNumberOfChangedFiles
     putStrLn $ show numberOfChangedFiles
     numberOfUntrackedFiles <- getNumberOfUntrackedFiles
     putStrLn $ show numberOfUntrackedFiles
+    let isCleanRepository = isLocalRepoClean stagedFiles conflictedFiles numberOfChangedFiles numberOfUntrackedFiles
+    if isCleanRepository == True
+    then putStrLn "1"
+    else putStrLn "0"
+
+isLocalRepoClean :: Int -> Int -> Int -> Int -> Bool
+isLocalRepoClean 0 0 0 0 = True
+isLocalRepoClean _ _ _ _ = False
 
 getDiffWithRemoteText :: DiffWithRemote -> String
 getDiffWithRemoteText diffWithRemote =
