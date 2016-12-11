@@ -8,6 +8,7 @@ module GitLib
       , getStagedStatus
       , StagedStatus (..)
       , getNumberOfChangedFiles
+      , getNumberOfUntrackedFiles
     ) where
 
 import System.Process
@@ -106,6 +107,18 @@ getNumberOfChangedFiles = do
           return 0
     where
       getUnmergedLines = filter (\ line -> isPrefixOf "U" line)
+
+getNumberOfUntrackedFiles :: IO Int
+getNumberOfUntrackedFiles = do
+        ( exitCode, commandResult, _ ) <- readProcessWithExitCode "git" ["status", "-s", "-uall"] []
+        if exitCode == ExitSuccess
+        then do
+          let statusLines = lines commandResult
+          let untrackedFiles = length $ getUntrackedLines statusLines
+          return untrackedFiles
+        else
+          return 0
+    where getUntrackedLines = filter (\ line -> isPrefixOf "??" line)
 
 -- Helper functions
 removeEndOfLine :: String -> String

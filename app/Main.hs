@@ -17,6 +17,8 @@ main = do
     putStrLn $ show $ conflicted stagedStatus
     numberOfChangedFiles <- getNumberOfChangedFiles
     putStrLn $ show numberOfChangedFiles
+    numberOfUntrackedFiles <- getNumberOfUntrackedFiles
+    putStrLn $ show numberOfUntrackedFiles
   else do
     shortRevision <- getShortRevisionOfHead
     putStrLn shortRevision
@@ -26,6 +28,8 @@ main = do
     putStrLn $ show $ conflicted stagedStatus
     numberOfChangedFiles <- getNumberOfChangedFiles
     putStrLn $ show numberOfChangedFiles
+    numberOfUntrackedFiles <- getNumberOfUntrackedFiles
+    putStrLn $ show numberOfUntrackedFiles
 
 getDiffWithRemoteText :: DiffWithRemote -> String
 getDiffWithRemoteText diffWithRemote =
