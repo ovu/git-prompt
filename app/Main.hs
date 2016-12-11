@@ -4,48 +4,64 @@ import GitLib
 
 main :: IO ()
 main = do
+  GitRepoStatus headInfo remoteStatus stagedStatus changedFiles  untrackedFiles isRepoClean <- getGitRepoStatus
+  case headInfo of
+    BranchName name -> putStrLn name
+    ShortRevision revision -> putStrLn revision
+  case remoteStatus of
+    RemoteStatus diffWithRemote -> putStrLn $ getDiffWithRemoteText diffWithRemote
+    NoRemoteStatus defaultStatus -> putStrLn defaultStatus
+  putStrLn $ show ( staged stagedStatus )
+  putStrLn $ show ( conflicted stagedStatus )
+  putStrLn $ show changedFiles
+  putStrLn $ show untrackedFiles
+  case isRepoClean of
+    True -> putStrLn "1"
+    False -> putStrLn "0"
+
+data HeadInfo = BranchName String | ShortRevision String
+data RemoteStatus = RemoteStatus DiffWithRemote | NoRemoteStatus String
+
+type NumberOfChangedFiles = Int
+type NumberOfUntrackedFiles = Int
+type IsRepoClean = Bool
+data GitRepoStatus = GitRepoStatus HeadInfo RemoteStatus StagedStatus NumberOfChangedFiles NumberOfUntrackedFiles IsRepoClean
+
+getGitRepoStatus :: IO GitRepoStatus
+getGitRepoStatus = do
   branchName <- getBranchName
+  headInfo <- getHeadInfo branchName
+  remoteStatus <- getRemoteStatus branchName
+  stagedStatus <- getStagedStatus
+  numberOfChangedFiles <- getNumberOfChangedFiles
+  numberOfUntrackedFiles <- getNumberOfUntrackedFiles
+  let isCleanRepository = isLocalRepoClean stagedStatus numberOfChangedFiles numberOfUntrackedFiles
+  return $ GitRepoStatus headInfo remoteStatus stagedStatus numberOfChangedFiles numberOfUntrackedFiles isCleanRepository
+
+type BranchName = String
+
+getHeadInfo :: BranchName -> IO HeadInfo
+getHeadInfo branchName = do
+  if branchName /= "" 
+  then return $ BranchName branchName
+  else do
+     shortRevision <- getShortRevisionOfHead
+     return $ ShortRevision shortRevision
+
+getRemoteStatus :: BranchName -> IO RemoteStatus
+getRemoteStatus branchName = do
   if branchName /= ""
   then do
-    putStrLn branchName
-    remoteName <- getRemoteName branchName
-    mergeBranch <- getMergeBranch branchName
-    differenceWithRemote <- getDifferenceWithRemote remoteName mergeBranch
-    putStrLn $ getDiffWithRemoteText differenceWithRemote
-    stagedStatus <- getStagedStatus
-    let stagedFiles = staged stagedStatus
-    let conflictedFiles = conflicted stagedStatus
-    putStrLn $ show $ stagedFiles
-    putStrLn $ show $ conflictedFiles
-    numberOfChangedFiles <- getNumberOfChangedFiles
-    putStrLn $ show numberOfChangedFiles
-    numberOfUntrackedFiles <- getNumberOfUntrackedFiles
-    putStrLn $ show numberOfUntrackedFiles
-    let isCleanRepository = isLocalRepoClean stagedFiles conflictedFiles numberOfChangedFiles numberOfUntrackedFiles
-    if isCleanRepository == True
-    then putStrLn "1"
-    else putStrLn "0"
-  else do
-    shortRevision <- getShortRevisionOfHead
-    putStrLn shortRevision
-    putStrLn "." -- No remote information when in hash
-    stagedStatus <- getStagedStatus
-    let stagedFiles = staged stagedStatus
-    let conflictedFiles = conflicted stagedStatus
-    putStrLn $ show $ stagedFiles
-    putStrLn $ show $ conflictedFiles
-    numberOfChangedFiles <- getNumberOfChangedFiles
-    putStrLn $ show numberOfChangedFiles
-    numberOfUntrackedFiles <- getNumberOfUntrackedFiles
-    putStrLn $ show numberOfUntrackedFiles
-    let isCleanRepository = isLocalRepoClean stagedFiles conflictedFiles numberOfChangedFiles numberOfUntrackedFiles
-    if isCleanRepository == True
-    then putStrLn "1"
-    else putStrLn "0"
+     remoteName <- getRemoteName branchName
+     mergeBranch <- getMergeBranch branchName
+     differenceWithRemote <- getDifferenceWithRemote remoteName mergeBranch
+     return $ RemoteStatus differenceWithRemote
+  else
+     return $ NoRemoteStatus "."
 
-isLocalRepoClean :: Int -> Int -> Int -> Int -> Bool
-isLocalRepoClean 0 0 0 0 = True
-isLocalRepoClean _ _ _ _ = False
+isLocalRepoClean :: StagedStatus -> Int -> Int -> Bool
+isLocalRepoClean (StagedStatus 0 0) 0 0 = True
+isLocalRepoClean (StagedStatus _ _) _ _ = False
 
 getDiffWithRemoteText :: DiffWithRemote -> String
 getDiffWithRemoteText diffWithRemote =
