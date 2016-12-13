@@ -78,7 +78,7 @@ function git_prompt_config()
   if [ "x$__GIT_STATUS_CMD" == "x" ]
   then
     git_prompt_dir
-    __GIT_STATUS_CMD="${__GIT_PROMPT_DIR}/get-prompt-exe"
+    __GIT_STATUS_CMD="${__GIT_PROMPT_DIR}/git-prompt-exe"
   fi
 }
 
