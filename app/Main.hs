@@ -4,20 +4,25 @@ import GitLib
 
 main :: IO ()
 main = do
-  GitRepoStatus headInfo remoteStatus stagedStatus changedFiles  untrackedFiles isRepoClean <- getGitRepoStatus
-  case headInfo of
-    BranchName name -> putStrLn name
-    ShortRevision revision -> putStrLn revision
-  case remoteStatus of
-    RemoteStatus diffWithRemote -> putStrLn $ getDiffWithRemoteText diffWithRemote
-    NoRemoteStatus defaultStatus -> putStrLn defaultStatus
-  putStrLn $ show ( staged stagedStatus )
-  putStrLn $ show ( conflicted stagedStatus )
-  putStrLn $ show changedFiles
-  putStrLn $ show untrackedFiles
-  case isRepoClean of
-    True -> putStrLn "1"
-    False -> putStrLn "0"
+  isGitRepository <- isGitRepository
+  if isGitRepository == False
+  then do 
+    return ()
+  else do
+    GitRepoStatus headInfo remoteStatus stagedStatus changedFiles  untrackedFiles isRepoClean <- getGitRepoStatus
+    case headInfo of
+      BranchName name -> putStrLn name
+      ShortRevision revision -> putStrLn revision
+    case remoteStatus of
+      RemoteStatus diffWithRemote -> putStrLn $ getDiffWithRemoteText diffWithRemote
+      NoRemoteStatus defaultStatus -> putStrLn defaultStatus
+    putStrLn $ show ( staged stagedStatus )
+    putStrLn $ show ( conflicted stagedStatus )
+    putStrLn $ show changedFiles
+    putStrLn $ show untrackedFiles
+    case isRepoClean of
+      True -> putStrLn "1"
+      False -> putStrLn "0"
 
 data HeadInfo = BranchName String | ShortRevision String
 data RemoteStatus = RemoteStatus DiffWithRemote | NoRemoteStatus String

@@ -9,6 +9,7 @@ module GitLib
       , StagedStatus (..)
       , getNumberOfChangedFiles
       , getNumberOfUntrackedFiles
+      , isGitRepository
     ) where
 
 import System.Process
@@ -17,6 +18,15 @@ import Text.Printf
 import Data.List
 
 type BranchName = String
+
+isGitRepository :: IO Bool
+isGitRepository = do
+    ( exitCode, symbolicRef, _ ) <- readProcessWithExitCode "git" ["rev-parse", "--show-toplevel"] []
+    if exitCode == ExitSuccess
+    then do
+      return True
+    else
+      return False
 
 getBranchName :: IO BranchName
 getBranchName = do
