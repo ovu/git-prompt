@@ -17,16 +17,16 @@ import System.Exit
 import Text.Printf
 import Data.List
 
-type BranchName = String
-
 isGitRepository :: IO Bool
 isGitRepository = do
-    ( exitCode, symbolicRef, _ ) <- readProcessWithExitCode "git" ["rev-parse", "--show-toplevel"] []
+    ( exitCode, _, _ ) <- readProcessWithExitCode "git" ["rev-parse", "--show-toplevel"] []
     if exitCode == ExitSuccess
     then do
       return True
     else
       return False
+
+type BranchName = String
 
 getBranchName :: IO BranchName
 getBranchName = do
