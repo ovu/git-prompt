@@ -18,3 +18,4 @@ stack build
 
 4. Source the file .gitprompt.sh in your profile for bash. In Mac OS it is the file .profile
 
+For fish shell copy the file fish_prompt.fish into ~/.config/fish/functions
