@@ -1,5 +1,5 @@
 name:                git-prompt
-version:             0.1.0.0
+version:             0.2.0.0
 synopsis:            Initial project template from stack
 description:         Please see README.md
 homepage:            https://github.com/ovu/git-prompt#readme
@@ -17,7 +17,9 @@ library
   hs-source-dirs:      src
   exposed-modules:     GitLib
   build-depends:       base >= 4.7 && < 5
-                      , process
+                     , process
+                     , transformers >= 0.5.2 && < 1
+                     , transformers-base >= 0.4.4 && < 1
   default-language:    Haskell2010
 
 executable git-prompt-exe
@@ -26,6 +28,9 @@ executable git-prompt-exe
   ghc-options:         -threaded -rtsopts -with-rtsopts=-N
   build-depends:       base
                      , git-prompt
+                     , transformers >= 0.5.2 && < 1
+                     , transformers-base >= 0.4.4 && < 1
+
   default-language:    Haskell2010
 
 test-suite git-prompt-test
