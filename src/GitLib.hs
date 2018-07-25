@@ -16,28 +16,25 @@ import System.Process
 import System.Exit
 import Text.Printf
 import Data.List
+import Data.Maybe
+import Control.Monad.Trans.Maybe
+import Control.Monad.Trans.Class
+import Control.Monad
 
 isGitRepository :: IO Bool
 isGitRepository = do
     ( exitCode, _, _ ) <- readProcessWithExitCode "git" ["rev-parse", "--show-toplevel"] []
-    if exitCode == ExitSuccess
-    then do
-      return True
-    else
-      return False
+    return (exitCode == ExitSuccess)
 
 type BranchName = String
 
-getBranchName :: IO BranchName
+getBranchName :: MaybeT IO BranchName
 getBranchName = do
-    ( exitCode, symbolicRef, _ ) <- readProcessWithExitCode "git" ["symbolic-ref", "HEAD"] []
-    if exitCode == ExitSuccess
-    then do
-      let branch  = removeFirstElevenChars symbolicRef
-      let branchToReturn = removeEndOfLine branch
-      return branchToReturn
-    else
-      return ""
+    ( exitCode, symbolicRef, _ ) <- lift $ readProcessWithExitCode "git" ["symbolic-ref", "HEAD"] []
+    guard ( exitCode == ExitSuccess )
+    let branch  = removeFirstElevenChars symbolicRef
+    let branchToReturn = removeEndOfLine branch
+    return branchToReturn
   where
     removeFirstElevenChars = drop 11
 
@@ -49,43 +46,34 @@ getShortRevisionOfHead = do
 
 type RemoteName = String
 
-getRemoteName :: BranchName -> IO RemoteName
+getRemoteName :: BranchName -> MaybeT IO RemoteName
 getRemoteName branchName = do
-    ( exitCode, remoteName, _ ) <- readProcessWithExitCode "git" ["config", printf "branch.%s.remote" branchName] []
-    if exitCode == ExitSuccess
-    then do
-      return $ removeEndOfLine remoteName
-    else
-      return ""
+    ( exitCode, remoteName, _ ) <- lift $ readProcessWithExitCode "git" ["config", printf "branch.%s.remote" branchName] []
+    guard ( exitCode == ExitSuccess )
+    return $ removeEndOfLine remoteName
 
 type MergeBranch = String
 
-getMergeBranch :: BranchName -> IO MergeBranch
+getMergeBranch :: BranchName -> MaybeT IO MergeBranch
 getMergeBranch branchName = do
-        ( exitCode, mergeName, _ ) <- readProcessWithExitCode "git" ["config", printf "branch.%s.merge" branchName] []
-        if exitCode == ExitSuccess
-        then do
-          return $ (removeFirstElevenChars . removeEndOfLine) mergeName
-        else
-          return ""
+        ( exitCode, mergeName, _ ) <- lift $ readProcessWithExitCode "git" ["config", printf "branch.%s.merge" branchName] []
+        guard (exitCode == ExitSuccess)
+        return $ (removeFirstElevenChars . removeEndOfLine) mergeName
   where
     removeFirstElevenChars = drop 11
 
 data DiffWithRemote = DiffWithRemote { behindCommits :: Int,
                                        aheadCommits :: Int } deriving Show
 
-getDifferenceWithRemote :: RemoteName -> MergeBranch -> IO DiffWithRemote
+getDifferenceWithRemote :: RemoteName -> MergeBranch -> MaybeT IO DiffWithRemote
 getDifferenceWithRemote remoteName mergeName = do
         let remoteRef = ( printf "refs/remotes/%s/%s" remoteName mergeName ) :: String
-        ( exitCode, behindAndAheadText, _ ) <- readProcessWithExitCode "git" ["rev-list", "--left-right", "--count", printf "%s...HEAD" remoteRef] []
-        if exitCode == ExitSuccess
-        then do
-          let behindAndAheadArray = words behindAndAheadText
-          let behindInt = ( read . head ) behindAndAheadArray
-          let aheadInt = ( read . last ) behindAndAheadArray
-          return $ DiffWithRemote behindInt aheadInt
-        else
-          return $ DiffWithRemote 0 0
+        ( exitCode, behindAndAheadText, _ ) <- lift $ readProcessWithExitCode "git" ["rev-list", "--left-right", "--count", printf "%s...HEAD" remoteRef] []
+        guard( exitCode == ExitSuccess )
+        let behindAndAheadArray = words behindAndAheadText
+        let behindInt = ( read . head ) behindAndAheadArray
+        let aheadInt = ( read . last ) behindAndAheadArray
+        return $ DiffWithRemote behindInt aheadInt
 
 data StagedStatus = StagedStatus { staged :: Int,
                                    conflicted :: Int } deriving Show
@@ -102,7 +90,7 @@ getStagedStatus = do
         else
           return $ StagedStatus 0 0
     where
-      getConflictedLines = filter (\ line -> isPrefixOf "U" line)
+      getConflictedLines = filter $ isPrefixOf "U"
 
 getNumberOfChangedFiles :: IO Int
 getNumberOfChangedFiles = do
@@ -116,7 +104,7 @@ getNumberOfChangedFiles = do
         else
           return 0
     where
-      getUnmergedLines = filter (\ line -> isPrefixOf "U" line)
+      getUnmergedLines = filter $ isPrefixOf "U"
 
 getNumberOfUntrackedFiles :: IO Int
 getNumberOfUntrackedFiles = do
@@ -128,7 +116,7 @@ getNumberOfUntrackedFiles = do
           return untrackedFiles
         else
           return 0
-    where getUntrackedLines = filter (\ line -> isPrefixOf "??" line)
+    where getUntrackedLines = filter $ isPrefixOf "??"
 
 -- Helper functions
 removeEndOfLine :: String -> String
