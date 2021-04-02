@@ -10,7 +10,7 @@ set ResetColor (set_color normal)       # Text Reset
 set Red (set_color red)                 # Red
 set Yellow (set_color yellow);          # Yellow
 set Green (set_color brgreen);            # Green
-set Blue (set_color blue)               # Blue
+set Blue (set_color 63afae)               # Blue (Tourquise)
 set WHITE (set_color white)
 
 # Bold
