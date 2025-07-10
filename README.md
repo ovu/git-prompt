@@ -3,6 +3,9 @@ Prompt for git repositories
 
 # Requirements
 
+Python
+
+Note: Haskell is still supported but it is not required
 Haskell environment installed
 
 # Installation
