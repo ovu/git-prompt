@@ -44,7 +44,8 @@ function fish_prompt
     set PROMPT_END " \n$WHITE$Time$ResetColor  \$ "
 
     set -e __CURRENT_GIT_STATUS
-    set gitstatus "$__GIT_PROMPT_DIR/git-prompt-exe"
+    # set gitstatus "$__GIT_PROMPT_DIR/git-prompt-exe"
+    set gitstatus "$__GIT_PROMPT_DIR/gitstatus.py"
 
     set _GIT_STATUS (bash -c $gitstatus)
     set __CURRENT_GIT_STATUS $_GIT_STATUS
@@ -61,10 +62,10 @@ function fish_prompt
         set GIT_CONFLICTS $__CURRENT_GIT_STATUS[4]
         set GIT_CHANGED $__CURRENT_GIT_STATUS[5]
         set GIT_UNTRACKED $__CURRENT_GIT_STATUS[6]
-        # set GIT_STASHED $__CURRENT_GIT_STATUS[7]
-        # set GIT_CLEAN $__CURRENT_GIT_STATUS[8]
-        set GIT_STASHED 0
-        set GIT_CLEAN $__CURRENT_GIT_STATUS[7]
+        set GIT_STASHED $__CURRENT_GIT_STATUS[7]
+        set GIT_CLEAN $__CURRENT_GIT_STATUS[8]
+        # set GIT_STASHED 0
+        # set GIT_CLEAN $__CURRENT_GIT_STATUS[7]
     end
 
     if test -n "$__CURRENT_GIT_STATUS"
